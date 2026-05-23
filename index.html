@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AdminOS Web</title>
+    <link rel="stylesheet" href="/src/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- ЭКРАН БЛОКИРОВКИ -->
+<div class="lock-screen" id="lock-screen">
+    <canvas id="lock-particles"></canvas>
+    <div class="lock-content">
+        <div class="lock-avatar">⚙️</div>
+        <div class="lock-time" id="lock-time">00:00</div>
+        <div class="lock-date" id="lock-date">Понедельник, 1 января</div>
+        <div class="lock-username" id="lock-username">Администратор</div>
+        <div class="lock-hint">Нажми любую клавишу для входа</div>
+    </div>
+</div>
+
+<!-- УВЕДОМЛЕНИЯ -->
+<div class="notifications-container" id="notifications-container"></div>
+
+<!-- ЦЕНТР УВЕДОМЛЕНИЙ -->
+<div class="notif-center" id="notif-center">
+    <div class="notif-center-header">
+        <span>Центр уведомлений</span>
+        <button onclick="AdminOS.clearNotifHistory()">Очистить</button>
+    </div>
+    <div class="notif-center-list" id="notif-center-list"></div>
+</div>
+
+<!-- КОНТЕКСТНОЕ МЕНЮ -->
+<div class="context-menu" id="context-menu">
+    <div class="ctx-item" onclick="AdminOS.createWindow('browser')">🌐 Браузер</div>
+    <div class="ctx-item" onclick="AdminOS.createWindow('notepad')">📝 Новая заметка</div>
+    <div class="ctx-item" onclick="AdminOS.createWindow('filemanager')">🗂️ Файловый менеджер</div>
+    <div class="ctx-divider"></div>
+    <div class="ctx-item" onclick="AdminOS.switchDesktop(-1)">◀ Раб. стол влево</div>
+    <div class="ctx-item" onclick="AdminOS.switchDesktop(1)">▶ Раб. стол вправо</div>
+    <div class="ctx-divider"></div>
+    <div class="ctx-item" onclick="AdminOS.createWindow('settings')">⚙️ Параметры</div>
+    <div class="ctx-item" onclick="AdminOS.lockScreen()">🔒 Заблокировать</div>
+</div>
+
+<!-- ВИДЖЕТЫ НА РАБОЧЕМ СТОЛЕ -->
+<div class="desktop-widgets" id="desktop-widgets">
+    <div class="widget widget-clock" id="widget-clock">
+        <div class="widget-time" id="widget-time">00:00</div>
+        <div class="widget-date-w" id="widget-date-w">Загрузка...</div>
+    </div>
+    <div class="widget widget-weather" id="widget-weather">
+        <div class="widget-weather-icon">🌤️</div>
+        <div class="widget-weather-info">
+            <div class="widget-weather-temp" id="widget-temp">--°C</div>
+            <div class="widget-weather-city" id="widget-city">Загрузка...</div>
+        </div>
+    </div>
+    <div class="widget widget-note" id="widget-note">
+        <div class="widget-note-title">📌 Заметка</div>
+        <textarea class="widget-note-area" id="widget-note-area" placeholder="Быстрая заметка..."></textarea>
+    </div>
+</div>
+
+<!-- ГЛАВНЫЙ APP -->
+<div id="app" style="display:none;">
+    <div class="desktop" id="desktop">
+        <div class="shortcuts-grid" id="shortcuts-grid"></div>
+    </div>
+
+    <!-- ИНДИКАТОР РАБОЧИХ СТОЛОВ -->
+    <div class="desktops-indicator" id="desktops-indicator"></div>
+
+    <!-- МЕНЮ ПУСК -->
+    <div class="start-menu" id="start-menu">
+        <div class="start-header">
+            <div class="start-user">
+                <div class="start-avatar">⚙️</div>
+                <div>
+                    <div class="start-username" id="start-username">Администратор</div>
+                    <div class="start-status">● Онлайн</div>
+                </div>
+            </div>
+        </div>
+        <div class="start-search">
+            <input type="text" placeholder="🔍 Поиск приложений..." id="start-search" oninput="AdminOS.filterApps(this.value)">
+        </div>
+        <div class="start-section-title">Приложения</div>
+        <div class="start-apps" id="start-apps-list">
+            <div class="start-app-item" data-name="браузер" onclick="AdminOS.createWindow('browser')"><span class="app-icon">🌐</span><span>Браузер</span></div>
+            <div class="start-app-item" data-name="блокнот" onclick="AdminOS.createWindow('notepad')"><span class="app-icon">📝</span><span>Блокнот</span></div>
+            <div class="start-app-item" data-name="файловый менеджер" onclick="AdminOS.createWindow('filemanager')"><span class="app-icon">🗂️</span><span>Файлы</span></div>
+            <div class="start-app-item" data-name="калькулятор" onclick="AdminOS.createWindow('calculator')"><span class="app-icon">🖩</span><span>Калькулятор</span></div>
+            <div class="start-app-item" data-name="медиаплеер музыка" onclick="AdminOS.createWindow('mediaplayer')"><span class="app-icon">🎵</span><span>Музыка</span></div>
+            <div class="start-app-item" data-name="paint рисование" onclick="AdminOS.createWindow('paint')"><span class="app-icon">🎨</span><span>Paint</span></div>
+            <div class="start-app-item" data-name="терминал консоль" onclick="AdminOS.createWindow('terminal')"><span class="app-icon">💻</span><span>Терминал</span></div>
+            <div class="start-app-item" data-name="задачи todo" onclick="AdminOS.createWindow('todo')"><span class="app-icon">✅</span><span>Задачи</span></div>
+            <div class="start-app-item" data-name="монитор система" onclick="AdminOS.createWindow('sysmonitor')"><span class="app-icon">📊</span><span>Монитор</span></div>
+            <div class="start-app-item" data-name="картинки фото" onclick="AdminOS.createWindow('imageviewer')"><span class="app-icon">🖼️</span><span>Фото</span></div>
+            <div class="start-app-item" data-name="змейка игра" onclick="AdminOS.createWindow('snake')"><span class="app-icon">🐍</span><span>Змейка</span></div>
+            <div class="start-app-item" data-name="тетрис игра" onclick="AdminOS.createWindow('tetris')"><span class="app-icon">🧱</span><span>Тетрис</span></div>
+            <div class="start-app-item" data-name="сапёр игра" onclick="AdminOS.createWindow('minesweeper')"><span class="app-icon">💣</span><span>Сапёр</span></div>
+            <div class="start-app-item" data-name="пинг понг игра" onclick="AdminOS.createWindow('pong')"><span class="app-icon">🏓</span><span>Пинг-понг</span></div>
+            <div class="start-app-item" data-name="настройки" onclick="AdminOS.createWindow('settings')"><span class="app-icon">⚙️</span><span>Настройки</span></div>
+        </div>
+        <div class="start-footer">
+            <button class="start-footer-btn" onclick="AdminOS.lockScreen()">🔒 Блокировка</button>
+        </div>
+    </div>
+
+    <!-- ПАНЕЛЬ ЗАДАЧ -->
+    <div class="taskbar" id="taskbar">
+        <div class="taskbar-left"></div>
+        <div class="taskbar-center">
+            <button class="taskbar-icon start-btn" onclick="AdminOS.toggleStartMenu()">⊞</button>
+            <div id="taskbar-apps" class="taskbar-apps"></div>
+        </div>
+        <div class="taskbar-right">
+            <div class="tray-icons">
+                <span class="tray-icon" title="Сеть">📶</span>
+                <div class="volume-tray">
+                    <span class="tray-icon" id="vol-icon" title="Громкость">🔊</span>
+                    <div class="volume-popup" id="volume-popup">
+                        <input type="range" class="vol-slider" id="master-vol" min="0" max="100" value="80">
+                        <span id="vol-label">80%</span>
+                    </div>
+                </div>
+                <span class="tray-icon" id="battery-icon" title="Батарея">🔋</span>
+                <span class="tray-icon notif-bell" id="notif-bell" onclick="AdminOS.toggleNotifCenter()" title="Уведомления">🔔</span>
+            </div>
+            <div class="clock-block">
+                <div class="system-time" id="clock">00:00</div>
+                <div class="system-date" id="taskbar-date">01.01</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>
+HTMLEOF
+echo "Done"
